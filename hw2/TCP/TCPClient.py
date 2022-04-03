@@ -37,7 +37,8 @@ while True:
             message = 'ASK_IP_PORT'
             clientSocket.send(message.encode())
             modifiedMessage = clientSocket.recv(2048).decode()
-            print('Reply from server: client IP = {}, port = {}', )
+            punct_loc = modifiedMessage.find(',')
+            print('Reply from server: client IP = {}, port = {}', modifiedMessage[:punct_loc], modifiedMessage[punct_loc+1:])
 
         elif option == 3:
             # send 'ASK_REQ_NUM'
@@ -56,7 +57,10 @@ while True:
             print('Reply from server: run time = ', modifiedMessage.decode())
 
         elif option == 5:
+            message = 'ASK_CONNEND'
+            clientSocket.send(message.encode())
             print('Bye bye~')
+            break
 
         else:
             print('Wrong Option Selected. Please Select menu again.')
