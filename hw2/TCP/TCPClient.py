@@ -29,45 +29,45 @@ while True:
             message_cmd = 'ASK_TXTCONV'
             message_text = input('Input lowercase sentence: ')
             clientSocket.send((message_cmd + ',' + message_text).encode())
-            start_time = time.time()
+            start_time = time.perf_counter()
             modifiedMessage = clientSocket.recv(2048)
-            end_time = time.time()
+            elapsed_time = time.perf_counter()-start_time
             print('Reply from server:', modifiedMessage.decode())
-            print(f'RTT = {(end_time - start_time)*1000} ms')
+            print(f'RTT = {elapsed_time*1000} ms')
 
         elif option == 2:
             # send 'ASK_IP_PORT'
             # recv [xxx.xxx.xxx.xxx, XXXX] which is my ip and port
             message = 'ASK_IP_PORT'
             clientSocket.send(message.encode())
-            start_time = time.time()
+            start_time = time.perf_counter()
             modifiedMessage = clientSocket.recv(2048).decode()
-            end_time = time.time()
+            elapsed_time = time.perf_counter()-start_time
             punct_loc = modifiedMessage.find(',')
             print(f'Reply from server: client IP = {modifiedMessage[:punct_loc]}, port = {modifiedMessage[punct_loc+1:]}')
-            print(f'RTT = {(end_time - start_time)*1000} ms')
+            print(f'RTT = {elapsed_time*1000} ms')
 
         elif option == 3:
             # send 'ASK_REQ_NUM'
             # recv [xxx] which is count of requests served
             message = 'ASK_REQ_NUM'
             clientSocket.send(message.encode())
-            start_time = time.time()
+            start_time = time.perf_counter()
             modifiedMessage = clientSocket.recv(2048)
-            end_time = time.time()
+            elapsed_time = time.perf_counter()-start_time
             print('Reply from server: requests served = ', modifiedMessage.decode())
-            print(f'RTT = {(end_time - start_time)*1000} ms')
+            print(f'RTT = {elapsed_time*1000} ms')
 
         elif option == 4:
             # send 'ASK_RUNTIME'
             # recv [xxx] which is run time of the server since it has been started
             message = 'ASK_RUNTIME'
             clientSocket.send(message.encode())
-            start_time = time.time()
+            start_time = time.perf_counter()
             modifiedMessage = clientSocket.recv(2048)
-            end_time = time.time()
+            elapsed_time = time.perf_counter()-start_time
             print('Reply from server: run time = ', modifiedMessage.decode())
-            print(f'RTT = {(end_time - start_time)*1000} ms')
+            print(f'RTT = {elapsed_time*1000} ms')
 
 
         elif option == 5:
@@ -82,5 +82,8 @@ while True:
     except KeyboardInterrupt:
         print('Bye bye~')
         break
-
+    
+    except ValueError:
+        print('Wrong Input, Please Input Again.')
+    
 clientSocket.close()
