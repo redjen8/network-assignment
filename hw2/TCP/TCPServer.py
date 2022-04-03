@@ -3,6 +3,7 @@
 #
 
 from socket import *
+import time
 
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -13,6 +14,7 @@ requestNumber = 0
 print("Server is ready to receive on port", serverPort)
 
 while True:
+    runTime = time.time()
     (connectionSocket, clientAddress) = serverSocket.accept()
     print('Connection request from', clientAddress)
     command_able = True
@@ -32,7 +34,8 @@ while True:
             elif cmd == 'ASK_REQ_NUM':
                 replyMessage = str(requestNumber)
             elif cmd == 'ASK_RUNTIME':
-                replyMessage = 'runtime'
+                currentTime = time.time()
+                replyMessage = str(currentTime - runTime)
             elif cmd == 'ASK_CONNEND':
                 print('Bye bye~')
                 connectionSocket.close()
