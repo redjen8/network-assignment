@@ -45,7 +45,7 @@ while True:
             message = 'ASK_REQ_NUM'
             clientSocket.send(message.encode())
             modifiedMessage = clientSocket.recv(2048)
-            print('Reply from server:', modifiedMessage.decode())
+            print('Reply from server: requests served = ', modifiedMessage.decode())
 
         elif option == 4:
             # send 'ASK_RUNTIME'
@@ -53,7 +53,7 @@ while True:
             message = 'ASK_RUNTIME'
             clientSocket.send(message.encode())
             modifiedMessage = clientSocket.recv(2048)
-            print('Reply from server:', modifiedMessage.decode())
+            print('Reply from server: run time = ', modifiedMessage.decode())
 
         elif option == 5:
             print('Bye bye~')
