@@ -3,6 +3,7 @@
 #
 
 from socket import *
+
 import time
 
 serverPort = 12000
@@ -10,14 +11,19 @@ serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
 serverSocket.listen(1)
 requestNumber = 0
+byeMessage = 'Bye bye~'
 
 print("Server is ready to receive on port", serverPort)
-
+runTime = time.time()
 while True:
-    runTime = time.time()
-    (connectionSocket, clientAddress) = serverSocket.accept()
-    print('Connection request from', clientAddress)
-    command_able = True
+    try :
+        (connectionSocket, clientAddress) = serverSocket.accept()
+        print('Connection request from', clientAddress)
+        command_able = True
+    except KeyboardInterrupt:
+        print(byeMessage)
+        break
+
     while command_able:
         command_able = False
         try:
@@ -37,7 +43,7 @@ while True:
                 currentTime = time.time()
                 replyMessage = str(currentTime - runTime)
             elif cmd == 'ASK_CONNEND':
-                print('Bye bye~')
+                print(byeMessage)
                 command_able = True
                 break
                 
@@ -49,13 +55,13 @@ while True:
             connectionSocket.send(replyMessage.encode())
 
         except KeyboardInterrupt:
-            print('Bye bye~')
+            print(byeMessage)
             break
         except ConnectionAbortedError:
-            print('Bye bye~')
+            print(byeMessage)
             break
 
         command_able = True
 
     connectionSocket.close()
-
+    
