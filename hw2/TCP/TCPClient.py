@@ -3,6 +3,7 @@
 #
 
 from socket import *
+import time
 
 serverName = 'localhost'
 serverPort = 12000
@@ -13,7 +14,7 @@ clientSocket.connect((serverName, serverPort))
 print("Client is running on port", clientSocket.getsockname()[1])
 
 while True:
-    print('<Menu>')
+    print('\n<Menu>')
     print('Please input your client option in integer')
     print('Option 1) Convert text to upper case letters')
     print('Option 2) Ask the server what is my ip and port number')
@@ -28,8 +29,11 @@ while True:
             message_cmd = 'ASK_TXTCONV'
             message_text = input('Input lowercase sentence: ')
             clientSocket.send((message_cmd + ',' + message_text).encode())
+            start_time = time.time()
             modifiedMessage = clientSocket.recv(2048)
+            end_time = time.time()
             print('Reply from server:', modifiedMessage.decode())
+            print(f'RTT = {(end_time - start_time)*1000} ms')
 
         elif option == 2:
             # send 'ASK_IP_PORT'
@@ -38,7 +42,7 @@ while True:
             clientSocket.send(message.encode())
             modifiedMessage = clientSocket.recv(2048).decode()
             punct_loc = modifiedMessage.find(',')
-            print(f'Reply from server: client IP = {0}, port = {1}', modifiedMessage[:punct_loc], modifiedMessage[punct_loc+1:])
+            print(f'Reply from server: client IP = {modifiedMessage[:punct_loc]}, port = {modifiedMessage[punct_loc+1:]}')
 
         elif option == 3:
             # send 'ASK_REQ_NUM'
