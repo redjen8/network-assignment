@@ -38,7 +38,7 @@ while True:
             clientSocket.send(message.encode())
             modifiedMessage = clientSocket.recv(2048).decode()
             punct_loc = modifiedMessage.find(',')
-            print('Reply from server: client IP = {}, port = {}', modifiedMessage[:punct_loc], modifiedMessage[punct_loc+1:])
+            print(f'Reply from server: client IP = {0}, port = {1}', modifiedMessage[:punct_loc], modifiedMessage[punct_loc+1:])
 
         elif option == 3:
             # send 'ASK_REQ_NUM'
