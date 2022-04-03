@@ -46,7 +46,8 @@ while True:
             break
         except ConnectionAbortedError:
             print('Bye bye~')
-        
+            break
+
         command_able = True
 
     connectionSocket.close()
