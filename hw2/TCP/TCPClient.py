@@ -80,6 +80,8 @@ while True:
             print('Wrong Option Selected. Please Select menu again.')
 
     except KeyboardInterrupt:
+        message = 'ASK_CONNEND'
+        clientSocket.send(message.encode())
         print('Bye bye~')
         break
     
