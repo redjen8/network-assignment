@@ -38,9 +38,13 @@ while True:
                 replyMessage = str(currentTime - runTime)
             elif cmd == 'ASK_CONNEND':
                 print('Bye bye~')
-                connectionSocket.close()
+                command_able = True
+                break
+                
             else:
                 replyMessage = 'Wrong Command'
+                command_able = True
+                break
 
             connectionSocket.send(replyMessage.encode())
 
