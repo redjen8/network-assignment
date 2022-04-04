@@ -2,7 +2,7 @@
 # SimpleEchoUDPClient.py
 #
 
-from socket import *
+from socket import AF_INET, SOCK_DGRAM, socket
 import time
 
 serverName = 'localhost'

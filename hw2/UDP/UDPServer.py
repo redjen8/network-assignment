@@ -2,7 +2,7 @@
 # SimpleEchoUDPServer.py
 #
 
-from socket import *
+from socket import AF_INET, SOCK_DGRAM, socket
 import datetime
 import time
 
