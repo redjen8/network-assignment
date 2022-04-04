@@ -33,7 +33,7 @@ while True:
             modifiedMessage = clientSocket.recv(2048)
             elapsed_time = time.perf_counter()-start_time
             print('Reply from server:', modifiedMessage.decode())
-            print(f'RTT = {elapsed_time*1000} ms')
+            print(f'RTT = {elapsed_time*1000:.2f} ms')
 
         elif option == 2:
             # send 'ASK_IP_PORT'
@@ -45,7 +45,7 @@ while True:
             elapsed_time = time.perf_counter()-start_time
             punct_loc = modifiedMessage.find(',')
             print(f'Reply from server: client IP = {modifiedMessage[:punct_loc]}, port = {modifiedMessage[punct_loc+1:]}')
-            print(f'RTT = {elapsed_time*1000} ms')
+            print(f'RTT = {elapsed_time*1000:.2f} ms')
 
         elif option == 3:
             # send 'ASK_REQ_NUM'
@@ -56,7 +56,7 @@ while True:
             modifiedMessage = clientSocket.recv(2048)
             elapsed_time = time.perf_counter()-start_time
             print('Reply from server: requests served = ', modifiedMessage.decode())
-            print(f'RTT = {elapsed_time*1000} ms')
+            print(f'RTT = {elapsed_time*1000:.2f} ms')
 
         elif option == 4:
             # send 'ASK_RUNTIME'
@@ -67,7 +67,7 @@ while True:
             modifiedMessage = clientSocket.recv(2048)
             elapsed_time = time.perf_counter()-start_time
             print('Reply from server: run time = ', modifiedMessage.decode())
-            print(f'RTT = {elapsed_time*1000} ms')
+            print(f'RTT = {elapsed_time*1000:.2f} ms')
 
 
         elif option == 5:
