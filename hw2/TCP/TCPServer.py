@@ -3,7 +3,7 @@
 #
 
 from socket import *
-
+import datetime
 import time
 
 serverPort = 12000
@@ -41,7 +41,7 @@ while True:
                 replyMessage = str(requestNumber)
             elif cmd == 'ASK_RUNTIME':
                 currentTime = time.time()
-                replyMessage = str(currentTime - runTime)
+                replyMessage = str(datetime.timedelta(seconds=currentTime-runTime)).split(".")[0]
             elif cmd == 'ASK_CONNEND':
                 print(byeMessage)
                 command_able = True
