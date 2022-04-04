@@ -5,11 +5,11 @@
 from socket import *
 import time
 
-serverName = 'nsl2.cau.ac.kr'
+serverName = 'localhost'
 serverPort = 12000
 
 clientSocket = socket(AF_INET, SOCK_DGRAM)
-#clientSocket.bind(('', 5432))
+clientSocket.bind(('', 0))
 
 print("Client is running on port", clientSocket.getsockname()[1])
 
@@ -56,7 +56,6 @@ while True:
             start_time = time.perf_counter()
             modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
             elapsed_time = time.perf_counter()-start_time
-            modifiedMessage = modifiedMessage.decode()
             print('Reply from server: requests served = ', modifiedMessage.decode())
             print(f'RTT = {elapsed_time*1000:.2f} ms')
 
@@ -68,7 +67,6 @@ while True:
             start_time = time.perf_counter()
             modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
             elapsed_time = time.perf_counter()-start_time
-            modifiedMessage = modifiedMessage.decode()
             print('Reply from server: run time = ', modifiedMessage.decode())
             print(f'RTT = {elapsed_time*1000:.2f} ms')
 
@@ -83,7 +81,7 @@ while True:
 
     except KeyboardInterrupt:
         message = 'ASK_CONNEND'
-        clientSocket.send(message.encode())
+        clientSocket.sendto(message.encode(), (serverName, serverPort))
         print('Bye bye~')
         break
     
