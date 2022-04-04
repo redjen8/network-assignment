@@ -60,6 +60,9 @@ while True:
         except ConnectionAbortedError:
             print(byeMessage)
             break
+        except ConnectionResetError:
+            print(byeMessage)
+            break
 
         command_able = True
 
