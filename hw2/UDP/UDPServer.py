@@ -48,5 +48,7 @@ while True:
         break
     except ConnectionAbortedError:
         print(byeMessage)
+    except ConnectionResetError:
+        pass
     
     
