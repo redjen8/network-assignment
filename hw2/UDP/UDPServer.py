@@ -37,13 +37,9 @@ while True:
             replyMessage = str(datetime.timedelta(seconds=currentTime-runTime)).split(".")[0]
         elif cmd == 'ASK_CONNEND':
             print(byeMessage)
-            command_able = True
-            break
             
         else:
             replyMessage = 'Wrong Command'
-            command_able = True
-            break
 
         serverSocket.sendto(replyMessage.encode(), clientAddress)
 
@@ -52,5 +48,5 @@ while True:
         break
     except ConnectionAbortedError:
         print(byeMessage)
-        break
+    
     
