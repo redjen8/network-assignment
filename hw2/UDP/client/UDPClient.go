@@ -50,7 +50,8 @@ func main() {
 			pconn.Close()
 		case 2:
 			var message_cmd string = "ASK_IP_PORT"
-			pconn.WriteTo([]byte(message_cmd))
+			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
+			pconn.WriteTo([]byte(message_cmd), server_addr)
 			start_time := time.Now()
 			buffer := make([]byte, 1024)
 			pconn.ReadFrom(buffer)
@@ -59,6 +60,15 @@ func main() {
 			fmt.Printf("Reply from server: client IP = %s, port = %s\n", string(buffer)[:punct_loc], string(buffer[punct_loc+1:]))
 			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 3:
+			var message_cmd string = "ASK_REQ_NUM"
+			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
+			pconn.WriteTo([]byte(message_cmd), server_addr)
+			start_time := time.Now()
+			buffer := make([]byte, 1024)
+			pconn.ReadFrom(buffer)
+			elapsed := time.Since(start_time)
+			fmt.Printf("Reply from server: requests served = %s\n", string(buffer))
+			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 4:
 		case 5:
 
