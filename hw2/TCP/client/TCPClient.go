@@ -63,6 +63,15 @@ func main() {
 			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer))
 			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
+		case 4:
+			var message_cmd string = "ASK_RUNTIME"
+			conn.Write([]byte(message_cmd))
+			start_time := time.Now()
+			buffer := make([]byte, 1024)
+			conn.Read(buffer)
+			elapsed := time.Since(start_time)
+			fmt.Printf("Reply from server: run time = %s\n", string(buffer))
+			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
 		}
 	}
 
