@@ -5,10 +5,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
-	"os"
 	"time"
 )
 
@@ -24,7 +22,13 @@ func main() {
 
 	for {
 		var user_option int
-		fmt.Print("Option :: ")
+		fmt.Println("<Menu>")
+		fmt.Println("Please input your client option in integer")
+		fmt.Println("Option 1) Convert text to upper case letters")
+		fmt.Println("Option 2) Ask the server what is my ip and port number")
+		fmt.Println("Option 3) Ask the server how many requests it has served so far")
+		fmt.Println("Option 4) Ask the server how long it has been running since it started")
+		fmt.Println("Option :: ")
 		fmt.Scanln(&user_option)
 
 		switch user_option {
@@ -35,19 +39,20 @@ func main() {
 			start_time := time.Now()
 			buffer := make([]byte, 1024)
 			conn.Read(buffer)
-			elapsed_time := time.Since(start_time)
+			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: %s", string(buffer))
-			fmt.Printf("RTT = %s", string(elapsed_time))
+			fmt.Printf("RTT = %s\n", elapsed)
+		case 2:
+			var message_cmd string = "ASK_IP_PORT"
+			conn.Write([]byte(message_cmd))
+			start_time := time.Now()
+			buffer := make([]byte, 1024)
+			conn.Read(buffer)
+			elapsed := time.Since(start_time)
+			fmt.Printf("Reply from server: client IP = %s, port = %s", string(buffer), string(buffer))
+			fmt.Printf("RTT = %s ms\n", elapsed)
 		}
 	}
-
-	fmt.Printf("Input lowercase sentence: ")
-	input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	conn.Write([]byte(input))
-
-	buffer := make([]byte, 1024)
-	conn.Read(buffer)
-	fmt.Printf("Reply from server: %s", string(buffer))
 
 	conn.Close()
 }
