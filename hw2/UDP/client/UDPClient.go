@@ -5,11 +5,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -21,6 +22,19 @@ func main() {
 
 	localAddr := pconn.LocalAddr().(*net.UDPAddr)
 	fmt.Printf("Client is running on port %d\n", localAddr.Port)
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-signals
+		var message_cmd string = "ASK_CONNEND"
+		server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
+		pconn.WriteTo([]byte(message_cmd), server_addr)
+		pconn.Close()
+		fmt.Println("Bye bye~")
+		os.Exit(0)
+	}()
 
 	for {
 		fmt.Println("\n<Menu>")
@@ -70,18 +84,23 @@ func main() {
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer))
 			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 4:
+			var message_cmd string = "ASK_RUNTIME"
+			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
+			pconn.WriteTo([]byte(message_cmd), server_addr)
+			start_time := time.Now()
+			buffer := make([]byte, 1024)
+			pconn.ReadFrom(buffer)
+			elapsed := time.Since(start_time)
+			fmt.Printf("Reply from server: run time = %s\n", string(buffer))
+			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 5:
-
+			var message_cmd string = "ASK_CONNEND"
+			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
+			pconn.WriteTo([]byte(message_cmd), server_addr)
+			fmt.Println("Bye bye~")
+			pconn.Close()
+			os.Exit(0)
 		}
 	}
-
-	fmt.Printf("Input lowercase sentence: ")
-	input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-
-	server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
-	pconn.WriteTo([]byte(input), server_addr)
-
-	buffer := make([]byte, 1024)
-	pconn.ReadFrom(buffer)
-	fmt.Printf("Reply from server: %s", string(buffer))
+	pconn.Close()
 }
