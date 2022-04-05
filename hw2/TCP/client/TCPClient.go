@@ -7,7 +7,10 @@ package main
 import (
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -20,6 +23,16 @@ func main() {
 
 	localAddr := conn.LocalAddr().(*net.TCPAddr)
 	fmt.Printf("Client is running on port %d\n", localAddr.Port)
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-signals
+		conn.Close()
+		fmt.Println("Bye bye~")
+		os.Exit(0)
+	}()
 
 	for {
 		var user_option int
@@ -74,6 +87,4 @@ func main() {
 			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
 		}
 	}
-
-	conn.Close()
 }
