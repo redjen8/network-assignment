@@ -29,6 +29,8 @@ func main() {
 
 	go func() {
 		<-signals
+		var message_cmd string = "ASK_CONNEND"
+		conn.Write([]byte(message_cmd))
 		conn.Close()
 		fmt.Println("Bye bye~")
 		os.Exit(0)
@@ -85,6 +87,12 @@ func main() {
 			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: run time = %s\n", string(buffer))
 			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
+		case 5:
+			var message_cmd string = "ASK_CONNEND"
+			conn.Write([]byte(message_cmd))
+			fmt.Println("Bye bye~")
+			conn.Close()
+			os.Exit(0)
 		}
 	}
 }
