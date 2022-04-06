@@ -57,9 +57,9 @@ func main() {
 			start_time := time.Now()
 			buffer := make([]byte, 1024)
 			conn.Read(buffer)
-			elapsed := time.Since(start_time)
+			elapsed := float64(time.Since(start_time)) / float64(time.Second)
 			fmt.Printf("Reply from server: %s\n", string(buffer))
-			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %.3f ms\n", elapsed)
 		case 2:
 			var message_cmd string = "ASK_IP_PORT"
 			conn.Write([]byte(message_cmd))
@@ -76,18 +76,18 @@ func main() {
 			start_time := time.Now()
 			buffer := make([]byte, 1024)
 			conn.Read(buffer)
-			elapsed := time.Since(start_time)
+			elapsed := float64(time.Since(start_time)) / float64(time.Second)
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer))
-			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %.3f ms\n", elapsed)
 		case 4:
 			var message_cmd string = "ASK_RUNTIME"
 			conn.Write([]byte(message_cmd))
 			start_time := time.Now()
 			buffer := make([]byte, 1024)
 			conn.Read(buffer)
-			elapsed := time.Since(start_time)
+			elapsed := float64(time.Since(start_time)) / float64(time.Second)
 			fmt.Printf("Reply from server: run time = %s\n", string(buffer))
-			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %.3f ms\n", elapsed)
 		case 5:
 			var message_cmd string = "ASK_CONNEND"
 			conn.Write([]byte(message_cmd))
