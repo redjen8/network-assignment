@@ -49,7 +49,7 @@ func main() {
 				break
 			}
 			cmd := strings.ToUpper(recv_message[:11])
-			fmt.Println(cmd)
+
 			switch cmd {
 			case "ASK_TXTCONV":
 				reply_message := strings.ToUpper(recv_message[12:])
@@ -61,8 +61,8 @@ func main() {
 				reply_message := request_number
 				conn.Write([]byte(strconv.Itoa(reply_message)))
 			case "ASK_RUNTIME":
-				reply_message := time.Since(start_time).String()
-				conn.Write([]byte(reply_message))
+				reply_message := time.Time{}.Add(time.Since(start_time))
+				conn.Write([]byte(reply_message.Format("15:04:05")))
 			case "ASK_CONNEND":
 				fmt.Println("Bye bye~")
 				conn.Close()
