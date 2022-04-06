@@ -53,9 +53,9 @@ func main() {
 			fmt.Println(reply_message)
 			pconn.WriteTo([]byte(strconv.Itoa(reply_message)), r_addr)
 		case "ASK_RUNTIME":
-			reply_message := time.Since(start_time).String()
+			reply_message := time.Time{}.Add(time.Since(start_time))
 			fmt.Println(reply_message)
-			pconn.WriteTo([]byte(reply_message), r_addr)
+			pconn.WriteTo([]byte(reply_message.Format("15:04:05")), r_addr)
 		case "ASK_CONNEND":
 			fmt.Println("Bye bye~")
 		}
