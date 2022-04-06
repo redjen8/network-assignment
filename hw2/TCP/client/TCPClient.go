@@ -44,6 +44,7 @@ func main() {
 		fmt.Println("Option 2) Ask the server what is my ip and port number")
 		fmt.Println("Option 3) Ask the server how many requests it has served so far")
 		fmt.Println("Option 4) Ask the server how long it has been running since it started")
+		fmt.Println("Option 5) Exit")
 		fmt.Print("Option :: ")
 		fmt.Scanln(&user_option)
 
