@@ -69,11 +69,8 @@ func main() {
 			count, _, _ := pconn.ReadFrom(buffer)
 			elapsed := time.Since(start_time)
 			punct_loc := strings.Index(string(buffer), ":")
-			if punct_loc == -1 {
-				fmt.Println("can't find port")
-			}
 			fmt.Printf("Reply from server: client IP = %s, port = %s\n", string(buffer)[:punct_loc], string(buffer[punct_loc+1:count]))
-			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
 		case 3:
 			var message_cmd string = "ASK_REQ_NUM"
 			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
@@ -82,7 +79,7 @@ func main() {
 			count, _, _ := pconn.ReadFrom(buffer)
 			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer[:count]))
-			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
 		case 4:
 			var message_cmd string = "ASK_RUNTIME"
 			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
@@ -91,7 +88,7 @@ func main() {
 			count, _, _ := pconn.ReadFrom(buffer)
 			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: run time = %s\n", string(buffer[:count]))
-			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
+			fmt.Printf("RTT = %d ms\n", elapsed.Milliseconds())
 		case 5:
 			var message_cmd string = "ASK_CONNEND"
 			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
