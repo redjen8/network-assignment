@@ -1,5 +1,6 @@
 /**
- * TCPServer.go
+ * EasyTCPServer.go
+ * 20172848 Jeong Seok Woo
  **/
 
 package main

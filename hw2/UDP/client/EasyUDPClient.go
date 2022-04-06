@@ -1,5 +1,6 @@
 /**
- * UDPClient.go
+ * EasyUDPClient.go
+ * 20172848 Jeong Seok Woo
  **/
 
 package main

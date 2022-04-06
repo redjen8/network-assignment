@@ -1,5 +1,6 @@
 /**
- * UDPServer.go
+ * EasyUDPServer.go
+ * 20172848 Jeong Seok Woo
  **/
 
 package main
