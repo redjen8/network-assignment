@@ -79,8 +79,8 @@ func main() {
 			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
 			pconn.WriteTo([]byte(message_cmd), server_addr)
 			start_time := time.Now()
-			elapsed := time.Since(start_time)
 			count, _, _ := pconn.ReadFrom(buffer)
+			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer[:count]))
 			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 4:
@@ -88,8 +88,8 @@ func main() {
 			server_addr, _ := net.ResolveUDPAddr("udp", serverName+":"+serverPort)
 			pconn.WriteTo([]byte(message_cmd), server_addr)
 			start_time := time.Now()
-			elapsed := time.Since(start_time)
 			count, _, _ := pconn.ReadFrom(buffer)
+			elapsed := time.Since(start_time)
 			fmt.Printf("Reply from server: run time = %s\n", string(buffer[:count]))
 			fmt.Printf("RTT = %d\n", elapsed.Milliseconds())
 		case 5:
