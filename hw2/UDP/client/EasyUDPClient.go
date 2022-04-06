@@ -16,8 +16,8 @@ import (
 )
 
 func main() {
-	serverName := "localhost"
-	serverPort := "12000"
+	serverName := "nsl2.cau.ac.kr"
+	serverPort := "32848"
 
 	pconn, _ := net.ListenPacket("udp", ":")
 

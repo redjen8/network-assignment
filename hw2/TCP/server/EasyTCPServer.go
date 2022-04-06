@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	serverPort := "12000"
+	serverPort := "22848"
 
 	listener, _ := net.Listen("tcp", ":"+serverPort)
 	fmt.Printf("Server is ready to receive on port %s\n", serverPort)

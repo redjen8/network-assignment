@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	serverPort := "12000"
+	serverPort := "32848"
 
 	pconn, _ := net.ListenPacket("udp", ":"+serverPort)
 	fmt.Printf("Server is ready to receive on port %s\n", serverPort)

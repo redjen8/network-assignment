@@ -17,8 +17,8 @@ import (
 
 func main() {
 
-	serverName := "localhost"
-	serverPort := "12000"
+	serverName := "nsl2.cau.ac.kr"
+	serverPort := "22848"
 
 	conn, _ := net.Dial("tcp", serverName+":"+serverPort)
 
