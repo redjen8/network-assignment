@@ -22,7 +22,6 @@ func main() {
 	fmt.Printf("Server is ready to receive on port %s\n", serverPort)
 	start_time := time.Now()
 	request_number := 0
-	buffer := make([]byte, 1024)
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -34,8 +33,9 @@ func main() {
 	}()
 
 	for {
+		buffer := make([]byte, 1024)
 		count, r_addr, _ := pconn.ReadFrom(buffer)
-		fmt.Printf("Connection requested from %s %d\n", r_addr, count)
+		fmt.Printf("Connection requested from %s\n", r_addr)
 		request_number += 1
 		recv_message := string(buffer[:count])
 		cmd := strings.ToUpper(recv_message[:11])
@@ -50,9 +50,11 @@ func main() {
 			pconn.WriteTo([]byte(reply_message), r_addr)
 		case "ASK_REQ_NUM":
 			reply_message := request_number
+			fmt.Println(reply_message)
 			pconn.WriteTo([]byte(strconv.Itoa(reply_message)), r_addr)
 		case "ASK_RUNTIME":
 			reply_message := time.Since(start_time).String()
+			fmt.Println(reply_message)
 			pconn.WriteTo([]byte(reply_message), r_addr)
 		case "ASK_CONNEND":
 			fmt.Println("Bye bye~")
