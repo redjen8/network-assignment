@@ -6,6 +6,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -16,7 +17,7 @@ import (
 )
 
 func main() {
-	serverName := "nsl2.cau.ac.kr"
+	serverName := "localhost"
 	serverPort := "32848"
 
 	pconn, _ := net.ListenPacket("udp", ":")
@@ -57,7 +58,7 @@ func main() {
 		case 1:
 			var message_cmd, message_text string = "ASK_TXTCONV", ""
 			fmt.Print("Input lowercase sentence: ")
-			fmt.Scanln(&message_text)
+			message_text, _ = bufio.NewReader(os.Stdin).ReadString('\n')
 			start_time := time.Now()
 			pconn.WriteTo([]byte(message_cmd+","+message_text), server_addr)
 			count, _, _ := pconn.ReadFrom(buffer)
