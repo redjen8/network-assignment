@@ -6,6 +6,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -17,7 +18,7 @@ import (
 
 func main() {
 
-	serverName := "nsl2.cau.ac.kr"
+	serverName := "localhost"
 	serverPort := "22848"
 
 	conn, _ := net.Dial("tcp", serverName+":"+serverPort)
@@ -53,7 +54,7 @@ func main() {
 		case 1:
 			var message_cmd, message_text string = "ASK_TXTCONV", ""
 			fmt.Print("Input lowercase sentence: ")
-			fmt.Scanln(&message_text)
+			message_text, _ = bufio.NewReader(os.Stdin).ReadString('\n')
 			buffer := make([]byte, 1024)
 			start_time := time.Now()
 			conn.Write([]byte(message_cmd + "," + message_text))
