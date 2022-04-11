@@ -44,15 +44,19 @@ func main() {
 		case "ASK_TXTCONV":
 			reply_message := strings.ToUpper(recv_message[12:])
 			pconn.WriteTo([]byte(reply_message), r_addr)
+			fmt.Printf("Command %s Executed.\n", strconv.Itoa(request_number))
 		case "ASK_IP_PORT":
 			reply_message := r_addr.String()
 			pconn.WriteTo([]byte(reply_message), r_addr)
+			fmt.Printf("Command %s Executed.\n", strconv.Itoa(request_number))
 		case "ASK_REQ_NUM":
 			reply_message := request_number
 			pconn.WriteTo([]byte(strconv.Itoa(reply_message)), r_addr)
+			fmt.Printf("Command %s Executed.\n", strconv.Itoa(request_number))
 		case "ASK_RUNTIME":
 			reply_message := time.Time{}.Add(time.Since(start_time))
 			pconn.WriteTo([]byte(reply_message.Format("15:04:05")), r_addr)
+			fmt.Printf("Command %s Executed.\n", strconv.Itoa(request_number))
 		case "ASK_CONNEND":
 			fmt.Println("Bye bye~")
 		}
