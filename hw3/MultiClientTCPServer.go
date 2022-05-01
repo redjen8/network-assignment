@@ -48,7 +48,7 @@ func connection_handle(conn net.Conn, name int, conn_list map[int]bool, start_ti
 			conn.Write([]byte(reply_message.Format("15:04:05")))
 			fmt.Printf("Command %s Executed From %s.\n", strconv.Itoa(request_number), conn.RemoteAddr().String())
 		case "ASK_CONNEND":
-			fmt.Println("Bye bye~")
+			fmt.Printf("Client %d disconnected. Number of connected clients = %d\n", name, len(conn_list)-1)
 			conn.Close()
 			delete(conn_list, name)
 			conn_flag = false
@@ -84,8 +84,8 @@ func main() {
 	for {
 		conn, _ := listener.Accept()
 		connection_number += 1
-		fmt.Printf("Connection request from %s as client %d\n", conn.RemoteAddr().String(), connection_number)
 		connection_list = add(connection_list, connection_number)
+		fmt.Printf("Client %d connected. Number of connected clients = %d\n", connection_number, len(connection_list))
 		go connection_handle(conn, connection_number, connection_list, start_time, request_number)
 	}
 }
