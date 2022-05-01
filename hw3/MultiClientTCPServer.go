@@ -39,7 +39,8 @@ func main() {
 		fmt.Printf("Connection request from %s\n", conn.RemoteAddr().String())
 
 		go func() {
-			for {
+			conn_flag := true
+			for conn_flag {
 				count, _ := conn.Read(buffer)
 				request_number += 1
 
@@ -69,6 +70,7 @@ func main() {
 				case "ASK_CONNEND":
 					fmt.Println("Bye bye~")
 					conn.Close()
+					conn_flag = false
 					break
 				}
 			}
