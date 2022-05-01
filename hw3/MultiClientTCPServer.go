@@ -16,8 +16,10 @@ import (
 	"time"
 )
 
-func connection_handle(conn net.Conn, name int, start_time time.Time, request_number int, buffer []byte) {
+func connection_handle(conn net.Conn, name int, conn_list map[int]bool, start_time time.Time, request_number int) {
 	conn_flag := true
+	buffer := make([]byte, 1024)
+
 	for conn_flag {
 		count, _ := conn.Read(buffer)
 		request_number += 1
@@ -48,10 +50,16 @@ func connection_handle(conn net.Conn, name int, start_time time.Time, request_nu
 		case "ASK_CONNEND":
 			fmt.Println("Bye bye~")
 			conn.Close()
+			delete(conn_list, name)
 			conn_flag = false
 			break
 		}
 	}
+}
+
+func add(s map[int]bool, v int) map[int]bool {
+	s[v] = true
+	return s
 }
 
 func main() {
@@ -62,7 +70,7 @@ func main() {
 	start_time := time.Now()
 	request_number := 0
 	connection_number := 0
-	buffer := make([]byte, 1024)
+	connection_list := map[int]bool{}
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -75,8 +83,9 @@ func main() {
 
 	for {
 		conn, _ := listener.Accept()
-		fmt.Printf("Connection request from %s\n", conn.RemoteAddr().String())
 		connection_number += 1
-		go connection_handle(conn, connection_number, start_time, request_number, buffer)
+		fmt.Printf("Connection request from %s as client %d\n", conn.RemoteAddr().String(), connection_number)
+		connection_list = add(connection_list, connection_number)
+		go connection_handle(conn, connection_number, connection_list, start_time, request_number)
 	}
 }
