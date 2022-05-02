@@ -59,37 +59,37 @@ func main() {
 			start_time := time.Now()
 			conn.Write([]byte(message_cmd + "," + message_text))
 			count, _ := conn.Read(buffer)
-			elapsed := float64(time.Since(start_time)) / float64(time.Millisecond)
+			elapsed := float64((time.Now().Sub(start_time)).Nanoseconds()) / 1000000
 			fmt.Printf("Reply from server: %s\n", string(buffer[:count]))
-			fmt.Printf("RTT = %.3f ms\n", elapsed)
+			fmt.Printf("RTT = %f ms\n", elapsed)
 		case 2:
 			var message_cmd string = "ASK_IP_PORT"
 			buffer := make([]byte, 1024)
 			start_time := time.Now()
 			conn.Write([]byte(message_cmd))
 			count, _ := conn.Read(buffer)
-			elapsed := float64(time.Since(start_time)) / float64(time.Millisecond)
+			elapsed := float64((time.Now().Sub(start_time)).Nanoseconds()) / 1000000
 			punct_loc := strings.LastIndex(string(buffer), ":")
 			fmt.Printf("Reply from server: client IP = %s, port = %s\n", string(buffer)[:punct_loc], string(buffer[punct_loc+1:count]))
-			fmt.Printf("RTT = %.3f ms\n", elapsed)
+			fmt.Printf("RTT = %f ms\n", elapsed)
 		case 3:
 			var message_cmd string = "ASK_REQ_NUM"
 			buffer := make([]byte, 1024)
 			start_time := time.Now()
 			conn.Write([]byte(message_cmd))
 			count, _ := conn.Read(buffer)
-			elapsed := float64(time.Since(start_time)) / float64(time.Millisecond)
+			elapsed := float64((time.Now().Sub(start_time)).Nanoseconds()) / 1000000
 			fmt.Printf("Reply from server: requests served = %s\n", string(buffer[:count]))
-			fmt.Printf("RTT = %.3f ms\n", elapsed)
+			fmt.Printf("RTT = %f ms\n", elapsed)
 		case 4:
 			var message_cmd string = "ASK_RUNTIME"
 			buffer := make([]byte, 1024)
 			start_time := time.Now()
 			conn.Write([]byte(message_cmd))
 			count, _ := conn.Read(buffer)
-			elapsed := float64(time.Since(start_time)) / float64(time.Millisecond)
+			elapsed := float64((time.Now().Sub(start_time)).Nanoseconds()) / 1000000
 			fmt.Printf("Reply from server: run time = %s\n", string(buffer[:count]))
-			fmt.Printf("RTT = %.3f ms\n", elapsed)
+			fmt.Printf("RTT = %f ms\n", elapsed)
 		case 5:
 			var message_cmd string = "ASK_CONNEND"
 			conn.Write([]byte(message_cmd))
