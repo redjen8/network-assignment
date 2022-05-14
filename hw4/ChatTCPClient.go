@@ -80,17 +80,22 @@ func main() {
 		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
 
 		if commandRegex.MatchString(slice[0]) {
-			switch slice[0] {
-			case "\\list":
+			command := slice[0]
+			if len(command) < 3 {
+				fmt.Println("Invalid Command")
+			}
+			command = command[1 : len(command)-2]
+			switch command {
+			case "list":
 				sendTCPData(1, "", conn)
-			case "\\dm":
+			case "dm":
 				sendTCPData(2, "message", conn)
-			case "\\exit":
+			case "exit":
 				sendTCPData(3, "", conn)
 				clientFlag = false
-			case "\\ver":
+			case "ver":
 				sendTCPData(4, "", conn)
-			case "\\rtt":
+			case "rtt":
 				sendTCPData(5, "", conn)
 			default:
 				fmt.Println("Invalid Command")
@@ -99,4 +104,5 @@ func main() {
 			sendTCPData(6, user_input, conn)
 		}
 	}
+	fmt.Println("gg~")
 }

@@ -56,7 +56,7 @@ func connection_handle(conn net.Conn, nickname string) {
 			replyMessage := nickname + " > " + chatContent
 			broadcastMessage(clientConnMap, replyMessage)
 		}
-		fmt.Printf("command %s : %s from %s\n", user_command, buffer[:count], conn.RemoteAddr().String())
+		fmt.Printf("[DEBUG] command %s : %s from %s\n", user_command, buffer[1:count], nickname+conn.RemoteAddr().String())
 	}
 }
 
@@ -85,8 +85,7 @@ func main() {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
 		userNickname := string(buffer[1:count])
-		fmt.Printf("User nickname : %s\n", userNickname)
-		fmt.Printf("User addr : %s\n", conn.RemoteAddr())
+		fmt.Printf("User nickname : %s from %s connected.\n", userNickname, conn.RemoteAddr())
 		if existClientInfo, isAlreadyExists := clientConnInfoMap[userNickname]; isAlreadyExists {
 			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo)
 			_, err = conn.Write([]byte(strconv.Itoa(-1)))
