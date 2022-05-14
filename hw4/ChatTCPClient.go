@@ -1,32 +1,42 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 )
 
 func sendTCPData(command_int int, message string, conn net.Conn) {
-	buf := make([]byte, 1024)
-	binary.LittleEndian.PutUint32(buf, uint32(command_int))
-	if message != "" {
-		copy(buf[1:], message)
-		fmt.Printf(string(buf[:]))
+	if len(message) == 0 {
+		message = strconv.Itoa(command_int)
+		fmt.Printf(message)
 	} else {
-		fmt.Printf(string(buf[:]))
+		message = strconv.Itoa(command_int) + message
+		fmt.Printf(message)
 	}
-	conn.Write(buf)
+	conn.Write([]byte(message))
 }
 
 func readServerUpdate(conn net.Conn) {
 	for {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
-		fmt.Printf("Reply from server: %s\n", string(buffer[:count]))
+		response := string(buffer[:count])
+		fmt.Println(response)
+		fmt.Printf("Reply from server: %s\n", response)
+	}
+}
+
+func detectTCPDisconnect(signals chan os.Signal, err error) {
+	for {
+		if err != nil {
+			fmt.Println("TCP Connection Disconnected.")
+			signal.Notify(signals, syscall.SIGTERM)
+		}
 	}
 }
 
@@ -35,12 +45,17 @@ func main() {
 	serverName := "localhost"
 	serverPort := "22848"
 
-	nickname := os.Args[1]
+	nickname := ""
+	if len(os.Args) > 2 {
+		nickname = os.Args[1]
+	} else {
+		nickname = "redjen"
+	}
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-	conn, _ := net.Dial("tcp", serverName+":"+serverPort)
+	conn, err := net.Dial("tcp", serverName+":"+serverPort)
 	sendTCPData(0, nickname, conn)
 
 	conn.Write([]byte(nickname))
@@ -50,11 +65,13 @@ func main() {
 
 	go func() {
 		<-signals
-		fmt.Println("Bye bye~")
+		sendTCPData(3, "", conn)
+		fmt.Println("gg~")
 		os.Exit(0)
 	}()
 
 	go readServerUpdate(conn)
+	go detectTCPDisconnect(signals, err)
 
 	clientFlag := true
 	for clientFlag {
@@ -75,6 +92,6 @@ func main() {
 		case "\\rtt":
 			sendTCPData(5, "", conn)
 		}
-		sendTCPData(99, "some message", conn)
+		sendTCPData(6, slice[0], conn)
 	}
 }

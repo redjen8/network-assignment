@@ -12,37 +12,40 @@ import (
 var clientConnInfoMap = map[string]string{}
 var clientConnMap = map[string]net.Conn{}
 
-func connection_handle(conn net.Conn) {
+func connection_handle(conn net.Conn, nickname string) {
 	conn_flag := true
 	buffer := make([]byte, 1024)
 
 	for conn_flag {
 		count, _ := conn.Read(buffer)
-		user_command := buffer[0]
+		fmt.Println(buffer[:count])
+		user_command := string(buffer[0])
 		switch user_command {
-		case 0:
+		case "0":
 			fmt.Printf("Welcome User : %s!\n", buffer[1])
-		case 1:
+		case "1":
 			// \list command
 			fmt.Printf("Welcome User : %s!\n", buffer[1])
-		case 2:
+		case "2":
 			// \dm command
 			fmt.Printf("")
-		case 3:
+		case "3":
 			// \exit command
 			fmt.Printf("")
 			conn_flag = false
-		case 4:
+			conn.Close()
+		case "4":
 			// \ver command
 			fmt.Printf("")
-		case 5:
+		case "5":
 			// \rtt command
 			fmt.Printf("")
-		case 99:
+		case "6":
 			// without any command, default chat
-			fmt.Printf("")
+			chatContent := string(buffer[1:count])
+			fmt.Printf("%s > %s\n", nickname, chatContent)
 		}
-		fmt.Printf("command %d : %s from %s\n", user_command, buffer[:count], conn.RemoteAddr().String())
+		fmt.Printf("command %s : %s from %s\n", user_command, buffer[:count], conn.RemoteAddr().String())
 	}
 }
 
@@ -70,11 +73,11 @@ func main() {
 		defer conn.Close()
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
-		userNickname := string(buffer[:count])
+		userNickname := string(buffer[1:count])
 		fmt.Printf("User nickname : %s\n", userNickname)
 		fmt.Printf("User addr : %s\n", conn.RemoteAddr())
 		if existClientInfo, isAlreadyExists := clientConnInfoMap[userNickname]; isAlreadyExists {
-			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo[0])
+			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo)
 			_, err = conn.Write([]byte(strconv.Itoa(-1)))
 			if err != nil {
 				continue
@@ -82,7 +85,7 @@ func main() {
 		} else {
 			clientConnInfoMap[userNickname] = conn.RemoteAddr().String()
 			clientConnMap[userNickname] = conn
-			go connection_handle(conn)
+			go connection_handle(conn, userNickname)
 		}
 	}
 }
