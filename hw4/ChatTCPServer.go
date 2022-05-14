@@ -12,6 +12,12 @@ import (
 var clientConnInfoMap = map[string]string{}
 var clientConnMap = map[string]net.Conn{}
 
+func broadcastMessage(connList map[string]net.Conn, message string) {
+	for _, element := range connList {
+		element.Write([]byte(message))
+	}
+}
+
 func connection_handle(conn net.Conn, nickname string) {
 	conn_flag := true
 	buffer := make([]byte, 1024)
@@ -22,17 +28,21 @@ func connection_handle(conn net.Conn, nickname string) {
 		user_command := string(buffer[0])
 		switch user_command {
 		case "0":
-			fmt.Printf("Welcome User : %s!\n", buffer[1])
+			fmt.Printf("Welcome User : %s!\n", buffer[1:count])
 		case "1":
 			// \list command
-			fmt.Printf("Welcome User : %s!\n", buffer[1])
+			fmt.Printf("Welcome User : %s!\n", buffer[1:count])
 		case "2":
 			// \dm command
 			fmt.Printf("")
 		case "3":
 			// \exit command
-			fmt.Printf("")
+			replyMessage := "Client " + nickname + " disconnected.\n"
+			fmt.Printf(replyMessage)
 			conn_flag = false
+			broadcastMessage(clientConnMap, replyMessage)
+			delete(clientConnInfoMap, nickname)
+			delete(clientConnMap, nickname)
 			conn.Close()
 		case "4":
 			// \ver command
@@ -43,7 +53,8 @@ func connection_handle(conn net.Conn, nickname string) {
 		case "6":
 			// without any command, default chat
 			chatContent := string(buffer[1:count])
-			fmt.Printf("%s > %s\n", nickname, chatContent)
+			replyMessage := nickname + " > " + chatContent
+			broadcastMessage(clientConnMap, replyMessage)
 		}
 		fmt.Printf("command %s : %s from %s\n", user_command, buffer[:count], conn.RemoteAddr().String())
 	}

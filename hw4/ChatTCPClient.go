@@ -26,7 +26,6 @@ func readServerUpdate(conn net.Conn) {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
 		response := string(buffer[:count])
-		fmt.Println(response)
 		fmt.Printf("Reply from server: %s\n", response)
 	}
 }
@@ -46,7 +45,7 @@ func main() {
 	serverPort := "22848"
 
 	nickname := ""
-	if len(os.Args) > 2 {
+	if len(os.Args) >= 2 {
 		nickname = os.Args[1]
 	} else {
 		nickname = "redjen"
