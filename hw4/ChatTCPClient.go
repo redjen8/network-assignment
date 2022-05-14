@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -13,10 +15,8 @@ import (
 func sendTCPData(command_int int, message string, conn net.Conn) {
 	if len(message) == 0 {
 		message = strconv.Itoa(command_int)
-		fmt.Printf(message)
 	} else {
 		message = strconv.Itoa(command_int) + message
-		fmt.Printf(message)
 	}
 	conn.Write([]byte(message))
 }
@@ -74,23 +74,29 @@ func main() {
 
 	clientFlag := true
 	for clientFlag {
-		var user_input string
-		fmt.Scanln(&user_input)
+		user_input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Println()
 		slice := strings.Split(user_input, " ")
+		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
 
-		switch slice[0] {
-		case "\\list":
-			sendTCPData(1, "", conn)
-		case "\\dm":
-			sendTCPData(2, "message", conn)
-		case "\\exit":
-			sendTCPData(3, "", conn)
-			clientFlag = false
-		case "\\ver":
-			sendTCPData(4, "", conn)
-		case "\\rtt":
-			sendTCPData(5, "", conn)
+		if commandRegex.MatchString(slice[0]) {
+			switch slice[0] {
+			case "\\list":
+				sendTCPData(1, "", conn)
+			case "\\dm":
+				sendTCPData(2, "message", conn)
+			case "\\exit":
+				sendTCPData(3, "", conn)
+				clientFlag = false
+			case "\\ver":
+				sendTCPData(4, "", conn)
+			case "\\rtt":
+				sendTCPData(5, "", conn)
+			default:
+				fmt.Println("Invalid Command")
+			}
+		} else {
+			sendTCPData(6, user_input, conn)
 		}
-		sendTCPData(6, slice[0], conn)
 	}
 }
