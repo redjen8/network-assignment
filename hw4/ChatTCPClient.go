@@ -57,8 +57,6 @@ func main() {
 	conn, err := net.Dial("tcp", serverName+":"+serverPort)
 	sendTCPData(0, nickname, conn)
 
-	conn.Write([]byte(nickname))
-
 	localAddr := conn.LocalAddr().(*net.TCPAddr)
 	fmt.Printf("Welcome %s to CAU network classroom at %s:%s. Client is running on port %d.\n", nickname, serverName, serverPort, localAddr.Port)
 
@@ -75,21 +73,36 @@ func main() {
 	clientFlag := true
 	for clientFlag {
 		user_input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		if strings.Contains(user_input, "\r\n") {
+			user_input = user_input[:len(user_input)-2]
+		} else if strings.Contains(user_input, "\n") {
+			user_input = user_input[:len(user_input)-1]
+		}
 		fmt.Println()
-		slice := strings.Split(user_input, " ")
+		input_slice := strings.Split(user_input, " ")
 		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
 
-		if commandRegex.MatchString(slice[0]) {
-			command := slice[0]
-			if len(command) < 3 {
-				fmt.Println("Invalid Command")
-			}
-			command = command[1 : len(command)-2]
+		if commandRegex.MatchString(input_slice[0]) {
+			command := input_slice[0]
+			//need to fix- what if len(command) < 3 and dm ?
+			//if len(command) < 3 {
+			//	fmt.Println("Invalid Command")
+			//}
+			command = command[1:len(command)]
 			switch command {
 			case "list":
 				sendTCPData(1, "", conn)
 			case "dm":
-				sendTCPData(2, "message", conn)
+				partnerNickname := input_slice[1]
+				partnerMessage := ""
+				for idx, eachMessage := range input_slice {
+					if idx <= 1 {
+						continue
+					}
+					partnerMessage += eachMessage + " "
+				}
+				partnerMessage = partnerMessage[:len(partnerNickname)]
+				sendTCPData(2, "{"+partnerNickname+"}"+partnerMessage, conn)
 			case "exit":
 				sendTCPData(3, "", conn)
 				clientFlag = false
