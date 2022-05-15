@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -34,11 +35,24 @@ func connection_handle(conn net.Conn, nickname string) {
 			// \list command
 			for key, value := range clientConnInfoMap {
 				eachClientInfo := key + value
+				fmt.Println(eachClientInfo)
 				conn.Write([]byte(eachClientInfo))
 			}
 		case "2":
 			// \dm command
-			fmt.Printf("")
+			chatContent := string(buffer[1:count])
+			lbraceLocation := strings.Index(chatContent, "{")
+			rbraceLocation := strings.Index(chatContent, "}")
+			if lbraceLocation == -1 || rbraceLocation == -1 {
+				conn.Write([]byte("Error : direct message format is wrong."))
+			}
+			partnerNickname := chatContent[lbraceLocation+1 : rbraceLocation]
+			if existClientInfo, isAlreadyExists := clientConnMap[partnerNickname]; isAlreadyExists {
+				directMessageContent := "from : " + nickname + "> " + chatContent[rbraceLocation+1:]
+				existClientInfo.Write([]byte(directMessageContent))
+			} else {
+				conn.Write([]byte("Error : cannot find user '" + partnerNickname + "' on the server."))
+			}
 		case "3":
 			// \exit command
 			replyMessage := "Client " + nickname + " disconnected.\n"
