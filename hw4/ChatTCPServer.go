@@ -5,16 +5,18 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 )
 
 var clientConnInfoMap = map[string]string{}
 var clientConnMap = map[string]net.Conn{}
+var version = "b0.0.1"
 
-func broadcastMessage(connList map[string]net.Conn, message string) {
-	for _, element := range connList {
-		element.Write([]byte(message))
+func broadcastMessage(connList map[string]net.Conn, message string, nickname string) {
+	for key, element := range connList {
+		if key != nickname {
+			element.Write([]byte(message))
+		}
 	}
 }
 
@@ -24,14 +26,16 @@ func connection_handle(conn net.Conn, nickname string) {
 
 	for conn_flag {
 		count, _ := conn.Read(buffer)
-		fmt.Println(buffer[:count])
 		user_command := string(buffer[0])
 		switch user_command {
 		case "0":
 			fmt.Printf("Welcome User : %s!\n", buffer[1:count])
 		case "1":
 			// \list command
-			fmt.Printf("Welcome User : %s!\n", buffer[1:count])
+			for key, value := range clientConnInfoMap {
+				eachClientInfo := key + value
+				conn.Write([]byte(eachClientInfo))
+			}
 		case "2":
 			// \dm command
 			fmt.Printf("")
@@ -40,13 +44,13 @@ func connection_handle(conn net.Conn, nickname string) {
 			replyMessage := "Client " + nickname + " disconnected.\n"
 			fmt.Printf(replyMessage)
 			conn_flag = false
-			broadcastMessage(clientConnMap, replyMessage)
+			broadcastMessage(clientConnMap, replyMessage, nickname)
 			delete(clientConnInfoMap, nickname)
 			delete(clientConnMap, nickname)
 			conn.Close()
 		case "4":
 			// \ver command
-			fmt.Printf("")
+			conn.Write([]byte(version))
 		case "5":
 			// \rtt command
 			fmt.Printf("")
@@ -54,7 +58,7 @@ func connection_handle(conn net.Conn, nickname string) {
 			// without any command, default chat
 			chatContent := string(buffer[1:count])
 			replyMessage := nickname + " > " + chatContent
-			broadcastMessage(clientConnMap, replyMessage)
+			broadcastMessage(clientConnMap, replyMessage, nickname)
 		}
 		fmt.Printf("[DEBUG] command %s : %s from %s\n", user_command, buffer[1:count], nickname+conn.RemoteAddr().String())
 	}
@@ -88,7 +92,13 @@ func main() {
 		fmt.Printf("User nickname : %s from %s connected.\n", userNickname, conn.RemoteAddr())
 		if existClientInfo, isAlreadyExists := clientConnInfoMap[userNickname]; isAlreadyExists {
 			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo)
-			_, err = conn.Write([]byte(strconv.Itoa(-1)))
+			_, err = conn.Write([]byte("that nickname is already used by another user. cannot connect"))
+			if err != nil {
+				continue
+			}
+		} else if len(clientConnMap) >= 8 {
+			fmt.Printf("User %s has been blocked, due to max connection limit.\n", existClientInfo)
+			_, err = conn.Write([]byte("chatting room full. cannot connect"))
 			if err != nil {
 				continue
 			}
