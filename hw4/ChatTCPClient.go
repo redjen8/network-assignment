@@ -101,7 +101,6 @@ func main() {
 					}
 					partnerMessage += eachMessage + " "
 				}
-				partnerMessage = partnerMessage[:len(partnerNickname)]
 				sendTCPData(2, "{"+partnerNickname+"}"+partnerMessage, conn)
 			case "exit":
 				sendTCPData(3, "", conn)
