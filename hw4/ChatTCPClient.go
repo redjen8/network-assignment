@@ -34,9 +34,12 @@ func readServerUpdate(conn net.Conn) {
 			startTime, _ := strconv.ParseInt(response[5:], 10, 64)
 			endTime := time.Now().UnixNano()
 			elapsed := float64(endTime - startTime)
-			fmt.Printf("%f ms", elapsed/float64(time.Millisecond))
+			fmt.Printf("RTT = %f ms\n", elapsed/float64(time.Millisecond))
+		} else if response[0:5] == "{err}" {
+			conn.Close()
+			break
 		} else {
-			fmt.Printf("Reply from server: %s\n", response)
+			fmt.Println(response)
 		}
 	}
 }
@@ -75,6 +78,7 @@ func main() {
 		<-signals
 		sendTCPData(3, "", conn)
 		fmt.Println("gg~")
+		conn.Close()
 		os.Exit(0)
 	}()
 
