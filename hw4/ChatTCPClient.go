@@ -27,12 +27,14 @@ func readServerUpdate(conn net.Conn) {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
 		response := string(buffer[:count])
+		if response == "" {
+			continue
+		}
 		if response[0:5] == "{rtt}" {
 			startTime, _ := strconv.ParseInt(response[5:], 10, 64)
 			endTime := time.Now().UnixNano()
-			fmt.Printf("Current Time : %d\n", endTime)
-			elapsed := (endTime - startTime)
-			fmt.Printf("%d ms", elapsed)
+			elapsed := float64(endTime - startTime)
+			fmt.Printf("%f ms", elapsed/float64(time.Millisecond))
 		} else {
 			fmt.Printf("Reply from server: %s\n", response)
 		}

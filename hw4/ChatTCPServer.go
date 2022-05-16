@@ -65,7 +65,6 @@ func connection_handle(conn net.Conn, nickname string) {
 			broadcastMessage(clientConnMap, replyMessage, nickname)
 			delete(clientConnInfoMap, nickname)
 			delete(clientConnMap, nickname)
-			conn.Close()
 		case "4":
 			// \ver command
 			conn.Write([]byte(version))
