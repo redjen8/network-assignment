@@ -35,6 +35,10 @@ func connection_handle(conn net.Conn, nickname string) {
 	for conn_flag {
 		count, _ := conn.Read(buffer)
 		user_command := string(buffer[0])
+		if count == 0 {
+			conn_flag = false
+			break
+		}
 		switch user_command {
 		case "1":
 			// \list command
@@ -52,20 +56,20 @@ func connection_handle(conn net.Conn, nickname string) {
 			lbraceLocation := strings.Index(chatContent, "{")
 			rbraceLocation := strings.Index(chatContent, "}")
 			if lbraceLocation == -1 || rbraceLocation == -1 {
-				conn.Write([]byte("Error : direct message format is wrong."))
+				conn.Write([]byte("[Error : direct message format is wrong.]"))
 			}
 			partnerNickname := chatContent[lbraceLocation+1 : rbraceLocation]
 			if existClientInfo, isAlreadyExists := clientConnMap[partnerNickname]; isAlreadyExists {
 				directMessageContent := "from : " + nickname + "> " + chatContent[rbraceLocation+1:]
 				existClientInfo.Write([]byte(directMessageContent))
 			} else {
-				conn.Write([]byte("Error : cannot find user '" + partnerNickname + "' on the server."))
+				conn.Write([]byte("[Error : cannot find user '" + partnerNickname + "' on the server.]"))
 			}
 		case "3":
 			// \exit command
 			delete(clientConnInfoMap, nickname)
 			delete(clientConnMap, nickname)
-			replyMessage := "Client " + nickname + " disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected."
+			replyMessage := "[Client " + nickname + " disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
 			fmt.Println(replyMessage)
 			conn_flag = false
 			broadcastMessage(clientConnMap, replyMessage, nickname)
@@ -81,6 +85,16 @@ func connection_handle(conn net.Conn, nickname string) {
 			chatContent := string(buffer[1:count])
 			replyMessage := nickname + " > " + chatContent
 			broadcastMessage(clientConnMap, replyMessage, nickname)
+
+			if strings.Contains(strings.ToLower(chatContent), "i hate professor") {
+				conn.Write([]byte("{err}[You are kicked from chat room.]"))
+				delete(clientConnInfoMap, nickname)
+				delete(clientConnMap, nickname)
+				banMessage := "[" + nickname + " is disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
+				broadcastMessage(clientConnMap, banMessage, "")
+			}
+		default:
+			continue
 		}
 	}
 }
@@ -110,16 +124,15 @@ func main() {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
 		userNickname := string(buffer[1:count])
-		fmt.Printf("User nickname : %s from %s connected.\n", userNickname, conn.RemoteAddr())
 		if existClientInfo, isAlreadyExists := clientConnInfoMap[userNickname]; isAlreadyExists {
 			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo)
-			_, err = conn.Write([]byte("{err}that nickname is already used by another user. cannot connect"))
+			_, err = conn.Write([]byte("{err}[that nickname is already used by another user. cannot connect]"))
 			if err != nil {
 				continue
 			}
 		} else if len(clientConnMap) >= 8 {
 			fmt.Println("User has been blocked, due to max connection limit.")
-			_, err = conn.Write([]byte("{err}chatting room full. cannot connect"))
+			_, err = conn.Write([]byte("{err}[chatting room full. cannot connect]"))
 			if err != nil {
 				continue
 			}
@@ -127,8 +140,9 @@ func main() {
 			clientConnInfoMap[userNickname] = conn.RemoteAddr().String()
 			clientConnMap[userNickname] = conn
 			go connection_handle(conn, userNickname)
-			welcomeMessage := userNickname + " joined from " + conn.RemoteAddr().String() + ". There are " + strconv.Itoa(len(clientConnMap)) + " users connected."
+			welcomeMessage := "[" + userNickname + " joined from " + conn.RemoteAddr().String() + ". There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
 			broadcastMessage(clientConnMap, welcomeMessage, "")
+			fmt.Println(welcomeMessage)
 		}
 	}
 }

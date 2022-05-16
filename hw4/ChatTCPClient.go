@@ -73,6 +73,7 @@ func main() {
 	sendTCPData(0, nickname, conn)
 
 	localAddr := conn.LocalAddr().(*net.TCPAddr)
+	fmt.Printf("Welcome %s to CAU network classroom at %s:%s. Client is running on port %d.\n", nickname, serverName, serverPort, localAddr.Port)
 
 	go func() {
 		<-signals
@@ -87,7 +88,6 @@ func main() {
 
 	clientFlag := true
 	for clientFlag {
-		fmt.Printf("Welcome %s to CAU network classroom at %s:%s. Client is running on port %d.\n", nickname, serverName, serverPort, localAddr.Port)
 		user_input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		if strings.Contains(user_input, "\r\n") {
 			user_input = user_input[:len(user_input)-2]
