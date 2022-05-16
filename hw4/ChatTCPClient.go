@@ -96,9 +96,11 @@ func main() {
 		}
 		fmt.Println()
 		input_slice := strings.Split(user_input, " ")
-		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
 
-		if commandRegex.MatchString(input_slice[0]) {
+		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
+		if input_slice[0] == "\\" {
+			fmt.Println("Invalid Command")
+		} else if commandRegex.MatchString(input_slice[0]) {
 			command := input_slice[0]
 			//need to fix- what if len(command) < 3 and dm ?
 			//if len(command) < 3 {

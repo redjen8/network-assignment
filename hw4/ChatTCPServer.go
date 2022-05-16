@@ -45,7 +45,7 @@ func connection_handle(conn net.Conn, nickname string) {
 			var listCmdReply string
 			numClient := 1
 			for key, value := range clientConnInfoMap {
-				eachClientInfo := key + value
+				eachClientInfo := key + " " + value
 				listCmdReply += "(" + strconv.Itoa(numClient) + ") " + eachClientInfo + "\n"
 				numClient += 1
 			}
@@ -65,11 +65,18 @@ func connection_handle(conn net.Conn, nickname string) {
 			} else {
 				conn.Write([]byte("[Error : cannot find user '" + partnerNickname + "' on the server.]"))
 			}
+			if strings.Contains(strings.ToLower(chatContent), "i hate professor") {
+				conn.Write([]byte("{err}[You are kicked from chat room.]"))
+				delete(clientConnInfoMap, nickname)
+				delete(clientConnMap, nickname)
+				banMessage := "[" + nickname + " left. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
+				broadcastMessage(clientConnMap, banMessage, "")
+			}
 		case "3":
 			// \exit command
 			delete(clientConnInfoMap, nickname)
 			delete(clientConnMap, nickname)
-			replyMessage := "[Client " + nickname + " disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
+			replyMessage := "[Client " + nickname + " left. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
 			fmt.Println(replyMessage)
 			conn_flag = false
 			broadcastMessage(clientConnMap, replyMessage, nickname)
@@ -90,7 +97,7 @@ func connection_handle(conn net.Conn, nickname string) {
 				conn.Write([]byte("{err}[You are kicked from chat room.]"))
 				delete(clientConnInfoMap, nickname)
 				delete(clientConnMap, nickname)
-				banMessage := "[" + nickname + " is disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
+				banMessage := "[" + nickname + " left. There are " + strconv.Itoa(len(clientConnMap)) + " users connected.]"
 				broadcastMessage(clientConnMap, banMessage, "")
 			}
 		default:
@@ -111,7 +118,7 @@ func main() {
 
 	go func() {
 		<-signals
-		fmt.Println("Bye bye~")
+		fmt.Println("gg~")
 		os.Exit(0)
 	}()
 
