@@ -106,7 +106,7 @@ func connection_handle(conn net.Conn, nickname string) {
 				broadcastMessage(clientConnMap, banMessage, "")
 			}
 		default:
-			continue
+			conn.Write([]byte("Invalid Command."))
 		}
 	}
 }
