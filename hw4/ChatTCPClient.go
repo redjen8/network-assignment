@@ -22,7 +22,7 @@ func sendTCPData(command_int int, message string, conn net.Conn) {
 	conn.Write([]byte(message))
 }
 
-func readServerUpdate(conn net.Conn) {
+func readServerUpdate(conn net.Conn, signals chan os.Signal) {
 	for {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
@@ -36,8 +36,9 @@ func readServerUpdate(conn net.Conn) {
 			elapsed := float64(endTime - startTime)
 			fmt.Printf("RTT = %f ms\n", elapsed/float64(time.Millisecond))
 		} else if response[0:5] == "{err}" {
+			fmt.Println(response[5:])
 			conn.Close()
-			break
+			os.Exit(0)
 		} else {
 			fmt.Println(response)
 		}
@@ -72,7 +73,6 @@ func main() {
 	sendTCPData(0, nickname, conn)
 
 	localAddr := conn.LocalAddr().(*net.TCPAddr)
-	fmt.Printf("Welcome %s to CAU network classroom at %s:%s. Client is running on port %d.\n", nickname, serverName, serverPort, localAddr.Port)
 
 	go func() {
 		<-signals
@@ -82,11 +82,12 @@ func main() {
 		os.Exit(0)
 	}()
 
-	go readServerUpdate(conn)
+	go readServerUpdate(conn, signals)
 	go detectTCPDisconnect(signals, err)
 
 	clientFlag := true
 	for clientFlag {
+		fmt.Printf("Welcome %s to CAU network classroom at %s:%s. Client is running on port %d.\n", nickname, serverName, serverPort, localAddr.Port)
 		user_input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		if strings.Contains(user_input, "\r\n") {
 			user_input = user_input[:len(user_input)-2]

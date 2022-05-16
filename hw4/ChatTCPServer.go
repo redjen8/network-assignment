@@ -63,12 +63,12 @@ func connection_handle(conn net.Conn, nickname string) {
 			}
 		case "3":
 			// \exit command
-			replyMessage := "Client " + nickname + " disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected."
-			fmt.Printf(replyMessage)
-			conn_flag = false
-			broadcastMessage(clientConnMap, replyMessage, nickname)
 			delete(clientConnInfoMap, nickname)
 			delete(clientConnMap, nickname)
+			replyMessage := "Client " + nickname + " disconnected. There are " + strconv.Itoa(len(clientConnMap)) + " users connected."
+			fmt.Println(replyMessage)
+			conn_flag = false
+			broadcastMessage(clientConnMap, replyMessage, nickname)
 		case "4":
 			// \ver command
 			conn.Write([]byte(version))
@@ -82,7 +82,6 @@ func connection_handle(conn net.Conn, nickname string) {
 			replyMessage := nickname + " > " + chatContent
 			broadcastMessage(clientConnMap, replyMessage, nickname)
 		}
-		//fmt.Printf("[DEBUG] command %s : %s from %s\n", user_command, buffer[1:count], nickname+conn.RemoteAddr().String())
 	}
 }
 
