@@ -102,15 +102,15 @@ func main() {
 			fmt.Println("Invalid Command")
 		} else if commandRegex.MatchString(input_slice[0]) {
 			command := input_slice[0]
-			//need to fix- what if len(command) < 3 and dm ?
-			//if len(command) < 3 {
-			//	fmt.Println("Invalid Command")
-			//}
 			command = command[1:len(command)]
 			switch command {
 			case "list":
 				sendTCPData(1, "", conn)
 			case "dm":
+				if len(input_slice) == 1 {
+					fmt.Println("Invalid Direct Message Format. Please input : \\dm nickname message")
+					break
+				}
 				partnerNickname := input_slice[1]
 				partnerMessage := ""
 				for idx, eachMessage := range input_slice {
