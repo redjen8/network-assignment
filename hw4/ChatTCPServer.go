@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -33,11 +34,14 @@ func connection_handle(conn net.Conn, nickname string) {
 			fmt.Printf("Welcome User : %s!\n", buffer[1:count])
 		case "1":
 			// \list command
+			var listCmdReply string
+			numClient := 1
 			for key, value := range clientConnInfoMap {
 				eachClientInfo := key + value
-				fmt.Println(eachClientInfo)
-				conn.Write([]byte(eachClientInfo))
+				listCmdReply += "(" + strconv.Itoa(numClient) + ") " + eachClientInfo + "\n"
+				numClient += 1
 			}
+			conn.Write([]byte(listCmdReply))
 		case "2":
 			// \dm command
 			chatContent := string(buffer[1:count])
@@ -67,7 +71,8 @@ func connection_handle(conn net.Conn, nickname string) {
 			conn.Write([]byte(version))
 		case "5":
 			// \rtt command
-			fmt.Printf("")
+			rttMessage := "{rtt}" + string(buffer[1:count])
+			conn.Write([]byte(rttMessage))
 		case "6":
 			// without any command, default chat
 			chatContent := string(buffer[1:count])

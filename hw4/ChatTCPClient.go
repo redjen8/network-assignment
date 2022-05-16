@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func sendTCPData(command_int int, message string, conn net.Conn) {
@@ -26,7 +27,15 @@ func readServerUpdate(conn net.Conn) {
 		buffer := make([]byte, 1024)
 		count, _ := conn.Read(buffer)
 		response := string(buffer[:count])
-		fmt.Printf("Reply from server: %s\n", response)
+		if response[0:5] == "{rtt}" {
+			startTime, _ := strconv.ParseInt(response[5:], 10, 64)
+			endTime := time.Now().UnixNano()
+			fmt.Printf("Current Time : %d\n", endTime)
+			elapsed := (endTime - startTime)
+			fmt.Printf("%d ms", elapsed)
+		} else {
+			fmt.Printf("Reply from server: %s\n", response)
+		}
 	}
 }
 
@@ -108,7 +117,8 @@ func main() {
 			case "ver":
 				sendTCPData(4, "", conn)
 			case "rtt":
-				sendTCPData(5, "", conn)
+				start_time := time.Now().UnixNano()
+				sendTCPData(5, strconv.Itoa(int(start_time)), conn)
 			default:
 				fmt.Println("Invalid Command")
 			}
