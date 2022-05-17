@@ -61,7 +61,7 @@ func detectTCPDisconnect(signals chan os.Signal, err error) {
 
 func main() {
 
-	serverName := "localhost"
+	serverName := "nsl2.cau.ac.kr"
 	serverPort := "22848"
 
 	nickname := ""

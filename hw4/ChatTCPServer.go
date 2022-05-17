@@ -51,6 +51,9 @@ func connection_handle(conn net.Conn, nickname string) {
 			numClient := 1
 			for key, value := range clientConnInfoMap {
 				eachClientInfo := key + " " + value
+				if key == nickname {
+					eachClientInfo += " (you)"
+				}
 				listCmdReply += "(" + strconv.Itoa(numClient) + ") " + eachClientInfo + "\n"
 				numClient += 1
 			}
