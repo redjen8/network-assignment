@@ -22,6 +22,10 @@ const (
 
 type Board [][]int
 
+var isPlayerTurn, isPlayerBlack bool
+var board Board
+var win int
+
 func printBoard(b Board) {
 	fmt.Print("   ")
 	for j := 0; j < Col; j++ {
@@ -147,12 +151,46 @@ func clear() {
 	}
 }
 
-func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, inputChannel chan string) {
+func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, userTurn chan bool) {
 	buffer := make([]byte, 1024)
 	for {
 		count, _, _ := udpConn.ReadFrom(buffer)
 		readMessages := string(buffer[:count])
-		fmt.Println(opponentNickname + "> " + readMessages)
+		messageCommand := readMessages[0:1]
+		switch messageCommand {
+		case "5":
+			// normal chat message
+			fmt.Println(opponentNickname + "> " + readMessages[1:])
+		case "2":
+			// omok game command
+			commandMessage := strings.Split(readMessages, " ")
+			newPosX := commandMessage[1]
+			newPosY := commandMessage[2]
+			opponentColor, _ := strconv.Atoi(commandMessage[3])
+			x, _ := strconv.Atoi(newPosX)
+			y, _ := strconv.Atoi(newPosY)
+			board[x][y] = opponentColor
+			clear()
+			printBoard(board)
+			win = checkWin(board, x, y)
+			if win != 0 {
+				fmt.Printf("player %d wins!\n", win)
+				break
+			}
+			count += 1
+			if count == Row*Col {
+				fmt.Printf("draw!\n")
+				break
+			}
+			isPlayerTurn = true
+		case "3":
+			// gg command
+			fmt.Println("Opponent called gg.")
+		case "4":
+			// exit command
+			fmt.Println("Opponent Exited.")
+		}
+
 	}
 }
 
@@ -176,7 +214,7 @@ func main() {
 	go func() {
 		<-signals
 		tcpConn.Close()
-		fmt.Println("Bye bye~")
+		fmt.Println("Bye~")
 		os.Exit(0)
 	}()
 
@@ -193,23 +231,27 @@ func main() {
 	opponentNickname := readFromBuffer[:opponentEndpointIdx]
 	opponentEndpoint, _ := net.ResolveUDPAddr("udp", readFromBuffer[opponentEndpointIdx+1:])
 
-	var isPlayerTurn, isPlayerBlack bool
 	if strings.Compare(string(buffer[0]), "0") == 0 {
 		isPlayerTurn = true
 		isPlayerBlack = true
-		fmt.Println(opponentNickname + " joined " + opponentEndpoint.String() + ", you play first.")
+		fmt.Println(opponentNickname + " joined " + opponentEndpoint.String() + ", you play first.\n")
 	} else {
 		fmt.Println(opponentNickname + " is waiting for you (" + opponentEndpoint.String() + ").")
 		isPlayerTurn = false
 		isPlayerBlack = false
-		fmt.Println(opponentNickname + " plays first.")
+		fmt.Println(opponentNickname + " plays first.\n")
 	}
 	tcpConn.Close()
+	var colorStr string
+	if isPlayerBlack {
+		colorStr = "1"
+	} else {
+		colorStr = "2"
+	}
 
-	readChannel := make(chan string)
-	go handleUDPConnection(udpConn, opponentNickname, readChannel)
+	userTurnChannel := make(chan bool)
+	go handleUDPConnection(udpConn, opponentNickname, userTurnChannel)
 
-	board := Board{}
 	x, y, count, win := -1, -1, 0, 0
 	for i := 0; i < Row; i++ {
 		var tempRow []int
@@ -222,12 +264,17 @@ func main() {
 
 	for {
 		userInput, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-		userInput = strings.TrimSuffix(userInput, "\n")
-		if isPlayerTurn {
-			// if player's turn, get standard input from client
-			commandRegex, _ := regexp.Compile("\\\\(\\w)+")
-			eachWord := strings.Split(userInput, " ")
-			if eachWord[0] == "\\" {
+		if strings.Contains(userInput, "\r\n") {
+			userInput = strings.TrimRight(userInput, "\r\n")
+		} else if strings.Contains(userInput, "\n") {
+			userInput = strings.TrimSuffix(userInput, "\n")
+		}
+
+		// if player's turn, get standard input from client
+		commandRegex, _ := regexp.Compile("\\\\(\\w)+")
+		eachWord := strings.Split(userInput, " ")
+		if eachWord[0] == "\\\\" {
+			if isPlayerTurn {
 				// coordinates, move on to omok game
 				x, _ = strconv.Atoi(eachWord[1])
 				y, _ = strconv.Atoi(eachWord[2])
@@ -255,23 +302,37 @@ func main() {
 				win = checkWin(board, x, y)
 				if win != 0 {
 					fmt.Printf("player %d wins!\n", win)
-					break
 				}
 				count += 1
 				if count == Row*Col {
 					fmt.Printf("draw!\n")
-					break
 				}
 				isPlayerTurn = false
-			} else if commandRegex.MatchString(eachWord[0]) {
-				// other commands
-				// \gg and \exit branch
+				sendMessage := "2 " + eachWord[1] + " " + eachWord[2] + " " + colorStr
+				// 1 byte to identify omok command, using "2"
+				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
 			} else {
-				udpConn.WriteTo([]byte(userInput), opponentEndpoint)
+				fmt.Println("It's not your turn!")
+			}
+		} else if commandRegex.MatchString(eachWord[0]) {
+			// other commands
+			// \gg and \exit branch
+			command := eachWord[0][1:]
+			switch command {
+			case "gg":
+				// 1 byte to identify gg command, using "3"
+				sendMessage := "3"
+				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+			case "exit":
+				// 1 byte to identify exit command, using "4"
+				fmt.Println("Bye~")
+				sendMessage := "4"
+				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+			default:
+				fmt.Println("Invalid Command")
 			}
 		} else {
-			// if opponent's turn, wait for opponent's turn ends
-			udpConn.WriteTo([]byte(userInput), opponentEndpoint)
+			udpConn.WriteTo([]byte("5"+userInput), opponentEndpoint)
 		}
 	}
 }
