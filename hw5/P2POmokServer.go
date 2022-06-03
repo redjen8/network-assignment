@@ -43,6 +43,8 @@ func connectionHandle(userNickname string) {
 
 		delete(clientConnMap, userNickname)
 		delete(clientConnMap, opponentNickname)
+		delete(clientUDPPortMap, userNickname)
+		delete(clientUDPPortMap, opponentNickname)
 		delete(clientConnInfoMap, userNickname)
 		delete(clientConnInfoMap, opponentNickname)
 		fmt.Println(opponentNickname + " and " + userNickname + "disconnected.")
@@ -79,7 +81,8 @@ func main() {
 		userNickname := readStr[:splitIndex]
 		userUDPPort := readStr[splitIndex+1:]
 
-		clientConnInfoMap[userNickname] = conn.RemoteAddr().String() + ":" + userUDPPort
+		clientConnInfoMap[userNickname] = conn.RemoteAddr().String()
+		clientUDPPortMap[userNickname], _ = strconv.Atoi(userUDPPort)
 		clientConnMap[userNickname] = conn
 		go connectionHandle(userNickname)
 	}
