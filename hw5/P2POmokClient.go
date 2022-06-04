@@ -25,6 +25,7 @@ type Board [][]int
 var isPlayerTurn, isPlayerBlack, isGameOnProgress bool
 var board Board
 var win int
+var timer = time.NewTicker(time.Second * 10)
 
 func printBoard(b Board) {
 	fmt.Print("   ")
@@ -152,7 +153,7 @@ func clear() {
 	}
 }
 
-func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, userTurn chan bool) {
+func handleUDPConnection(udpConn net.PacketConn, opponentNickname string) {
 	buffer := make([]byte, 1024)
 	for {
 		count, _, _ := udpConn.ReadFrom(buffer)
@@ -186,6 +187,10 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, userTu
 				break
 			}
 			isPlayerTurn = true
+			if isGameOnProgress {
+				timer = time.NewTicker(10 * time.Second)
+				go omokPlayTimer(udpConn)
+			}
 		case "3":
 			// gg command
 			if isGameOnProgress {
@@ -202,6 +207,17 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, userTu
 			fmt.Println("Opponent Exited.")
 		}
 
+	}
+}
+
+func omokPlayTimer(udpConn net.PacketConn) {
+	for {
+		select {
+		case <-timer.C:
+			fmt.Println("10 seconds elapsed!!!!")
+			timer.Stop()
+			return
+		}
 	}
 }
 
@@ -261,8 +277,7 @@ func main() {
 		colorStr = "2"
 	}
 
-	userTurnChannel := make(chan bool)
-	go handleUDPConnection(udpConn, opponentNickname, userTurnChannel)
+	go handleUDPConnection(udpConn, opponentNickname)
 
 	x, y, count, win := -1, -1, 0, 0
 	for i := 0; i < Row; i++ {
@@ -326,6 +341,7 @@ func main() {
 				sendMessage := "2 " + eachWord[1] + " " + eachWord[2] + " " + colorStr
 				// 1 byte to identify omok command, using "2"
 				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+				timer.Stop()
 			} else {
 				fmt.Println("It's not your turn!")
 			}
