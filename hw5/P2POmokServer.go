@@ -36,11 +36,11 @@ func connectionHandle(userNickname string) {
 		fmt.Println("2 user connected, notifying " + opponentNickname + " and " + userNickname)
 		playerConnection := clientConnMap[userNickname]
 		opponentConnection := clientConnMap[opponentNickname]
-		opponentMessage := "0" + userNickname + "." + clientConnInfoMap[userNickname] + ":" + strconv.Itoa(clientUDPPortMap[userNickname])
+		opponentMessage := "0" + userNickname + "," + clientConnInfoMap[userNickname] + ":" + strconv.Itoa(clientUDPPortMap[userNickname])
 		opponentConnection.Write([]byte(opponentMessage))
 
 		// first player came into server plays first
-		playerMessage := "1" + opponentNickname + "." + clientConnInfoMap[opponentNickname] + ":" + strconv.Itoa(clientUDPPortMap[opponentNickname])
+		playerMessage := "1" + opponentNickname + "," + clientConnInfoMap[opponentNickname] + ":" + strconv.Itoa(clientUDPPortMap[opponentNickname])
 		playerConnection.Write([]byte(playerMessage))
 
 		delete(clientConnMap, userNickname)
