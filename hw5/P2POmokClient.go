@@ -123,7 +123,6 @@ func checkWin(b Board, x, y int) int {
 	}
 
 	if endY-startY+1 >= 5 {
-		isGameOnProgress = false
 		return lastStone
 	}
 
@@ -158,6 +157,7 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 	for {
 		count, _, _ := udpConn.ReadFrom(buffer)
 		readMessages := string(buffer[:count])
+		fmt.Println(readMessages)
 		messageCommand := readMessages[0:1]
 		switch messageCommand {
 		case "5":
@@ -194,6 +194,8 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 		case "3":
 			// gg command
 			if isGameOnProgress {
+				clear()
+				printBoard(board)
 				fmt.Println("you win")
 				fmt.Println("Opponent called gg.")
 				isGameOnProgress = false
@@ -201,14 +203,21 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 		case "4":
 			// exit command
 			if isGameOnProgress {
+				clear()
+				printBoard(board)
 				fmt.Println("you win")
 				isGameOnProgress = false
 			}
 			fmt.Println("Opponent Exited.")
 		case "6":
 			// opponent timed out
-			fmt.Println("you win")
-			isGameOnProgress = false
+			if isGameOnProgress {
+				clear()
+				printBoard(board)
+				fmt.Println("Opponent Timed out.")
+				fmt.Println("you win")
+				isGameOnProgress = false
+			}
 		}
 
 	}
@@ -224,6 +233,7 @@ func omokPlayTimer(udpConn net.PacketConn, opponentIPPort string) {
 			opponentEndpoint, _ := net.ResolveUDPAddr("udp", opponentIPPort)
 			udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
 			timer.Stop()
+			isGameOnProgress = false
 			return
 		}
 	}
@@ -312,6 +322,10 @@ func main() {
 		if eachWord[0] == "\\\\" {
 			if isPlayerTurn {
 				// coordinates, move on to omok game
+				if !isGameOnProgress {
+					fmt.Println("Game already finished!")
+					continue
+				}
 				if len(eachWord) != 3 {
 					fmt.Println("error, must enter x y!")
 					time.Sleep(1 * time.Second)
@@ -340,11 +354,13 @@ func main() {
 				if win != 0 {
 					fmt.Printf("you win\n")
 					isGameOnProgress = false
+					timer.Stop()
 				}
 				count += 1
 				if count == Row*Col {
 					fmt.Printf("draw!\n")
 					isGameOnProgress = false
+					timer.Stop()
 				}
 				isPlayerTurn = false
 				sendMessage := "2 " + eachWord[1] + " " + eachWord[2] + " " + colorStr
@@ -367,12 +383,17 @@ func main() {
 					sendMessage := "3"
 					udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
 					isGameOnProgress = false
+					timer.Stop()
+					clear()
+					printBoard(board)
+					fmt.Println("you lose (gave up game)")
 				} else {
 					fmt.Println("Game already finished. Ignore command..")
 				}
 			case "exit":
 				// 1 byte to identify exit command, using "4"
 				fmt.Println("Bye~")
+				isGameOnProgress = false
 				sendMessage := "4"
 				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
 				os.Exit(0)
