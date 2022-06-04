@@ -14,6 +14,18 @@ var clientConnInfoMap = map[string]string{} // stores ip address of client
 var clientUDPPortMap = map[string]int{}     // stores opened udp port of client
 var clientConnMap = map[string]net.Conn{}   // stores actual tcp connection of client
 
+func getListenConnection(userNickname string) {
+	buffer := make([]byte, 1024)
+	count, _ := clientConnMap[userNickname].Read(buffer)
+	tcpInput := string(buffer[:count])
+	if tcpInput == "9" {
+		fmt.Println("User " + userNickname + " disconnected while waiting for opponent.")
+		delete(clientConnMap, userNickname)
+		delete(clientUDPPortMap, userNickname)
+		delete(clientConnInfoMap, userNickname)
+	}
+}
+
 func connectionHandle(userNickname string) {
 	userUDPPort := clientUDPPortMap[userNickname]
 	var opponentNickname string
@@ -22,6 +34,7 @@ func connectionHandle(userNickname string) {
 		// first player connected to server. waits..
 		fmt.Println(userNickname + " joined from " + clientConnInfoMap[userNickname] + ". UDP port " + strconv.Itoa(userUDPPort) + ".")
 		fmt.Println("1 user connected, Waiting for another")
+		go getListenConnection(userNickname)
 	} else if len(clientConnMap) == 2 {
 		// second player connected to server, starts game
 		strconv.Itoa(clientUDPPortMap[userNickname])
