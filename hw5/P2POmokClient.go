@@ -198,6 +198,7 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 				fmt.Println("you win")
 				fmt.Println("Opponent called gg.")
 				isGameOnProgress = false
+				timer.Stop()
 			}
 		case "4":
 			// exit command
@@ -206,6 +207,7 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 				printBoard(board)
 				fmt.Println("you win")
 				isGameOnProgress = false
+				timer.Stop()
 			}
 			fmt.Println("Opponent Exited.")
 		case "6":
@@ -216,6 +218,7 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 				fmt.Println("Opponent Timed out.")
 				fmt.Println("you win")
 				isGameOnProgress = false
+				timer.Stop()
 			}
 		}
 
@@ -247,7 +250,7 @@ func main() {
 		userNickname = "redjen"
 	}
 
-	serverName := "nsl2.cau.ac.kr"
+	serverName := "localhost"
 	serverPort := "52848"
 
 	tcpConn, _ := net.Dial("tcp", serverName+":"+serverPort)
@@ -260,22 +263,28 @@ func main() {
 	udpConnPort := udpConn.LocalAddr().(*net.UDPAddr).Port
 	welcomeMessage := userNickname + ":" + strconv.Itoa(udpConnPort)
 	tcpConn.Write([]byte(welcomeMessage))
-
-	buffer := make([]byte, 1024)
-	tcpCount, _ := tcpConn.Read(buffer)
-	readFromBuffer := string(buffer[1:tcpCount])
-	opponentEndpointIdx := strings.LastIndex(readFromBuffer, ",")
-	opponentNickname := readFromBuffer[:opponentEndpointIdx]
-	opponentIPPort := readFromBuffer[opponentEndpointIdx+1:]
-	opponentEndpoint, _ := net.ResolveUDPAddr("udp", opponentIPPort)
+	opponentEndpoint, _ := net.ResolveUDPAddr("udp", "")
 
 	go func() {
 		<-signals
+		tcpConn.Write([]byte("9"))
 		tcpConn.Close()
 		udpConn.WriteTo([]byte("4"), opponentEndpoint)
 		fmt.Println("Bye~")
 		os.Exit(0)
 	}()
+
+	buffer := make([]byte, 1024)
+	tcpCount, _ := tcpConn.Read(buffer)
+	if tcpCount < 1 {
+		fmt.Println("Bye~")
+		os.Exit(0)
+	}
+	readFromBuffer := string(buffer[1:tcpCount])
+	opponentEndpointIdx := strings.LastIndex(readFromBuffer, ",")
+	opponentNickname := readFromBuffer[:opponentEndpointIdx]
+	opponentIPPort := readFromBuffer[opponentEndpointIdx+1:]
+	opponentEndpoint, _ = net.ResolveUDPAddr("udp", opponentIPPort)
 
 	if strings.Compare(string(buffer[0]), "0") == 0 {
 		isPlayerTurn = true
