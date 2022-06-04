@@ -22,7 +22,7 @@ const (
 
 type Board [][]int
 
-var isPlayerTurn, isPlayerBlack bool
+var isPlayerTurn, isPlayerBlack, isGameOnProgress bool
 var board Board
 var win int
 
@@ -47,9 +47,9 @@ func printBoard(b Board) {
 			if c == 0 {
 				fmt.Print(" +")
 			} else if c == 1 {
-				fmt.Print(" 0")
-			} else if c == 2 {
 				fmt.Print(" @")
+			} else if c == 2 {
+				fmt.Print(" 0")
 			} else {
 				fmt.Print(" |")
 			}
@@ -122,6 +122,7 @@ func checkWin(b Board, x, y int) int {
 	}
 
 	if endY-startY+1 >= 5 {
+		isGameOnProgress = false
 		return lastStone
 	}
 
@@ -129,7 +130,7 @@ func checkWin(b Board, x, y int) int {
 }
 
 func clear() {
-	fmt.Printf("%s", runtime.GOOS)
+	//fmt.Printf("%s", runtime.GOOS)
 
 	clearMap := make(map[string]func()) //Initialize it
 	clearMap["linux"] = func() {
@@ -174,20 +175,30 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname string, userTu
 			printBoard(board)
 			win = checkWin(board, x, y)
 			if win != 0 {
-				fmt.Printf("player %d wins!\n", win)
+				fmt.Printf("you lose\n")
+				isGameOnProgress = false
 				break
 			}
 			count += 1
 			if count == Row*Col {
 				fmt.Printf("draw!\n")
+				isGameOnProgress = false
 				break
 			}
 			isPlayerTurn = true
 		case "3":
 			// gg command
-			fmt.Println("Opponent called gg.")
+			if isGameOnProgress {
+				fmt.Println("you win")
+				fmt.Println("Opponent called gg.")
+				isGameOnProgress = false
+			}
 		case "4":
 			// exit command
+			if isGameOnProgress {
+				fmt.Println("you win")
+				isGameOnProgress = false
+			}
 			fmt.Println("Opponent Exited.")
 		}
 
@@ -242,6 +253,7 @@ func main() {
 		fmt.Println(opponentNickname + " plays first.\n")
 	}
 	tcpConn.Close()
+	isGameOnProgress = true
 	var colorStr string
 	if isPlayerBlack {
 		colorStr = "1"
@@ -276,13 +288,14 @@ func main() {
 		if eachWord[0] == "\\\\" {
 			if isPlayerTurn {
 				// coordinates, move on to omok game
-				x, _ = strconv.Atoi(eachWord[1])
-				y, _ = strconv.Atoi(eachWord[2])
 				if len(eachWord) != 3 {
 					fmt.Println("error, must enter x y!")
 					time.Sleep(1 * time.Second)
 					continue
-				} else if x < 0 || y < 0 || x >= Row || y >= Col {
+				}
+				x, _ = strconv.Atoi(eachWord[1])
+				y, _ = strconv.Atoi(eachWord[2])
+				if x < 0 || y < 0 || x >= Row || y >= Col {
 					fmt.Println("error, out of bound!")
 					time.Sleep(1 * time.Second)
 					continue
@@ -301,11 +314,13 @@ func main() {
 				printBoard(board)
 				win = checkWin(board, x, y)
 				if win != 0 {
-					fmt.Printf("player %d wins!\n", win)
+					fmt.Printf("you win\n")
+					isGameOnProgress = false
 				}
 				count += 1
 				if count == Row*Col {
 					fmt.Printf("draw!\n")
+					isGameOnProgress = false
 				}
 				isPlayerTurn = false
 				sendMessage := "2 " + eachWord[1] + " " + eachWord[2] + " " + colorStr
@@ -321,13 +336,19 @@ func main() {
 			switch command {
 			case "gg":
 				// 1 byte to identify gg command, using "3"
-				sendMessage := "3"
-				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+				if isGameOnProgress {
+					sendMessage := "3"
+					udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+					isGameOnProgress = false
+				} else {
+					fmt.Println("Game already finished. Ignore command..")
+				}
 			case "exit":
 				// 1 byte to identify exit command, using "4"
 				fmt.Println("Bye~")
 				sendMessage := "4"
 				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
+				os.Exit(0)
 			default:
 				fmt.Println("Invalid Command")
 			}
