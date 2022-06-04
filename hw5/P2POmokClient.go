@@ -157,7 +157,6 @@ func handleUDPConnection(udpConn net.PacketConn, opponentNickname, opponentIPPor
 	for {
 		count, _, _ := udpConn.ReadFrom(buffer)
 		readMessages := string(buffer[:count])
-		fmt.Println(readMessages)
 		messageCommand := readMessages[0:1]
 		switch messageCommand {
 		case "5":
@@ -365,9 +364,7 @@ func main() {
 				isPlayerTurn = false
 				sendMessage := "2 " + eachWord[1] + " " + eachWord[2] + " " + colorStr
 				// 1 byte to identify omok command, using "2"
-				if isGameOnProgress {
-					udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
-				}
+				udpConn.WriteTo([]byte(sendMessage), opponentEndpoint)
 				timer.Stop()
 			} else {
 				fmt.Println("It's not your turn!")
