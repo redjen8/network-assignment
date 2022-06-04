@@ -255,13 +255,6 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		<-signals
-		tcpConn.Close()
-		fmt.Println("Bye~")
-		os.Exit(0)
-	}()
-
 	fmt.Println("Welcome " + userNickname + " to p2p-omok server at " + serverName + ":" + serverPort + ".")
 	udpConn, _ := net.ListenPacket("udp", ":")
 	udpConnPort := udpConn.LocalAddr().(*net.UDPAddr).Port
@@ -275,6 +268,14 @@ func main() {
 	opponentNickname := readFromBuffer[:opponentEndpointIdx]
 	opponentIPPort := readFromBuffer[opponentEndpointIdx+1:]
 	opponentEndpoint, _ := net.ResolveUDPAddr("udp", opponentIPPort)
+
+	go func() {
+		<-signals
+		tcpConn.Close()
+		udpConn.WriteTo([]byte("4"), opponentEndpoint)
+		fmt.Println("Bye~")
+		os.Exit(0)
+	}()
 
 	if strings.Compare(string(buffer[0]), "0") == 0 {
 		isPlayerTurn = true
