@@ -98,16 +98,17 @@ func main() {
 		userUDPPort := readStr[splitIndex+1:]
 
 		if existClientInfo, isAlreadyExists := clientConnInfoMap[userNickname]; isAlreadyExists {
-			fmt.Printf("User nickname conflict. User Info : %s\n", existClientInfo)
-			_, err = conn.Write([]byte("that nickname is already used by another user. cannot connect"))
+			fmt.Printf("User nickname conflict. User Info : %s:%s\n", userNickname, existClientInfo)
+			_, err = conn.Write([]byte("9"))
 			if err != nil {
 				continue
 			}
+		} else {
+			ipAddrIdx := strings.LastIndex(conn.RemoteAddr().String(), ":")
+			clientConnInfoMap[userNickname] = conn.RemoteAddr().String()[:ipAddrIdx]
+			clientUDPPortMap[userNickname], _ = strconv.Atoi(userUDPPort)
+			clientConnMap[userNickname] = conn
+			go connectionHandle(userNickname)
 		}
-		ipAddrIdx := strings.LastIndex(conn.RemoteAddr().String(), ":")
-		clientConnInfoMap[userNickname] = conn.RemoteAddr().String()[:ipAddrIdx]
-		clientUDPPortMap[userNickname], _ = strconv.Atoi(userUDPPort)
-		clientConnMap[userNickname] = conn
-		go connectionHandle(userNickname)
 	}
 }

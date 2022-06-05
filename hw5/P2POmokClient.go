@@ -250,7 +250,7 @@ func main() {
 		userNickname = "redjen"
 	}
 
-	serverName := "localhost"
+	serverName := "nsl2.cau.ac.kr"
 	serverPort := "52848"
 
 	tcpConn, _ := net.Dial("tcp", serverName+":"+serverPort)
@@ -281,6 +281,11 @@ func main() {
 		os.Exit(0)
 	}
 	readFromBuffer := string(buffer[1:tcpCount])
+	if strings.Compare(string(buffer[0:1]), "9") == 0 {
+		// nickname conflict. exit
+		fmt.Println("Same nickname is used by another user. Shutting down..")
+		os.Exit(0)
+	}
 	opponentEndpointIdx := strings.LastIndex(readFromBuffer, ",")
 	opponentNickname := readFromBuffer[:opponentEndpointIdx]
 	opponentIPPort := readFromBuffer[opponentEndpointIdx+1:]
